@@ -3,37 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تشريح المحرك - حسن</title>
+    <title>مشروع حسن - تشريح المحرك</title>
     <style>
-        :root { --accent: #ff4757; --bg: #0f0f0f; }
-        body { font-family: 'Arial', sans-serif; background: var(--bg); color: #ecf0f1; text-align: center; margin: 0; padding: 10px; }
-        .viewport { position: relative; width: 100%; max-width: 600px; margin: 15px auto; border: 2px solid #333; border-radius: 15px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        #engine-display { width: 100%; display: block; transition: all 0.7s ease-in-out; }
-        .hotspot { position: absolute; width: 20px; height: 20px; background: var(--accent); border: 2px solid #fff; border-radius: 50%; cursor: pointer; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-        #detail-panel { margin-top: 15px; padding: 15px; background: #1a1a1a; border-radius: 12px; display: none; border: 1px solid var(--accent); }
-        .back-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-        ul { list-style: none; padding: 0; text-align: right; }
-        li { margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        :root { --main-red: #ff4757; --dark-bg: #121212; }
+        body { font-family: 'Tahoma', sans-serif; background: var(--dark-bg); color: white; margin: 0; padding: 0; }
+        
+        header { padding: 20px; text-align: center; background: #1a1a1a; border-bottom: 3px solid var(--main-red); }
+        h1 { margin: 0; font-size: 1.5rem; color: var(--main-red); }
+        .user-name { font-size: 0.9rem; color: #aaa; margin-top: 5px; }
+
+        .viewport {
+            position: relative;
+            width: 100vw; /* عرض الشاشة بالكامل */
+            height: 60vh; /* ارتفاع مناسب للموبايل */
+            overflow: hidden;
+            background: #000;
+        }
+
+        #engine-display {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* يخلي الصورة تملي المكان بدون ما تنعفص */
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hotspot {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: var(--main-red);
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%); /* لموازنة مكان النقطة */
+            box-shadow: 0 0 15px var(--main-red);
+        }
+
+        #detail-panel {
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 20px 200px 0 0; /* شكل جمالي */
+            margin-top: -20px;
+            position: relative;
+            display: none;
+            z-index: 10;
+        }
+
+        .back-btn {
+            background: var(--main-red);
+            border: none; color: white; padding: 10px 25px;
+            border-radius: 50px; font-weight: bold; margin-top: 15px;
+        }
+
+        ul { padding: 0; list-style: none; text-align: right; }
+        li { padding: 10px 0; border-bottom: 1px solid #333; }
     </style>
 </head>
 <body>
 
-    <h2 style="color:var(--accent)">🛠️ تشريح المحرك الهندسي (بالعراقي)</h2>
-    
-    <div class="viewport">
-        <img id="engine-display" src="https://images.unsplash.com/photo-1597766353939-93725666060c?q=80&w=1000" alt="Engine">
+    <header>
+        <h1>🛠️ تشريح المحرك الهندسي</h1>
+        <div class="user-name">إعداد المهندس: حسن</div>
+    </header>
+
+    <div class="viewport" id="view">
+        <img id="engine-display" src="https://images.unsplash.com/photo-1597766353939-93725666060c?q=80&w=1200" alt="Engine">
         <div id="spots-container"></div>
     </div>
 
     <div id="detail-panel">
-        <h3 id="part-title" style="color:var(--accent)"></h3>
+        <h2 id="part-title" style="color:var(--main-red)"></h2>
         <div id="sub-list"></div>
-        <button class="back-btn" onclick="resetApp()">رجوع للكل</button>
+        <button class="back-btn" onclick="resetApp()">الرجوع للمحرك الكامل</button>
     </div>
 
     <script>
         const engineData = {
+            main: [
+                { id: 'core', name: 'الكور (حشوة المكينة)', x: '50%', y: '45%' },
+                { id: 'elec', name: 'الفيوزات والكهرباء', x: '85%', y: '35%' },
+                { id: 'cool', name: 'الراديتر والتبريد', x: '20%', y: '70%' }
+            ],
+            sub: {
+                core: ['السكبات: شفتات اللفات','اللفات: بوابات الهوى','البلكات: القدحة والشرارة','البساتم: عمود الحركة'],
+                elec: ['علبة الفيوزات: الحماية','الدينامو: الشحن','الباتري: طاقة البدء'],
+                cool: ['الراديتر: مبرد المي','المراوح: سحب الهوى','دبة المي: خزان الاحتياط']
+            }
+        };
+
+        function render() {
+            const container = document.getElementById('spots-container');
+            container.innerHTML = '';
+            engineData.main.forEach(p => {
+                const dot = document.createElement('div');
+                dot.className = 'hotspot';
+                dot.style.left = p.x; dot.style.top = p.y;
+                dot.onclick = () => {
+                    const img = document.getElementById('engine-display');
+                    img.style.transform = "scale(2.5)";
+                    img.style.transformOrigin = `${p.x} ${p.y}`;
+                    document.getElementById('detail-panel').style.display = 'block';
+                    document.getElementById('part-title').innerText = p.name;
+                    document.getElementById('sub-list').innerHTML = '<ul>' + engineData.sub[p.id].map(s => `<li>🔹 ${s}</li>`).join('') + '</ul>';
+                    container.innerHTML = '';
+                };
+                container.appendChild(dot);
+            });
+        }
+
+        function resetApp() {
+            document.getElementById('engine-display').style.transform = "scale(1)";
+            document.getElementById('detail-panel').style.display = 'none';
+            render();
+        }
+
+        render();
+    </script>
+</body>
+</html>
             main: [
                 { id: 'core', name: 'الكور (قلب المكينة)', x: '50%', y: '40%' },
                 { id: 'electrical', name: 'المنظومة الكهربائية', x: '80%', y: '30%' },
