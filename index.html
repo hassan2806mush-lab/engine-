@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>موسوعة المحرك بالعراقي - المهندس حسن</title>
+    <style>
+        :root { --accent: #e74c3c; --bg: #121212; }
+        body { font-family: 'Arial', sans-serif; background: var(--bg); color: white; text-align: center; margin: 0; padding: 20px; }
+        
+        .main-title { color: var(--accent); text-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+        
+        .viewport {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+            margin: 20px auto;
+            border: 4px solid #333;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #engine-display {
+            width: 100%;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .hotspot {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: rgba(231, 76, 60, 0.6);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .hotspot:hover { background: var(--accent); transform: scale(1.3); }
+
+        #detail-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 15px;
+            display: none;
+            border-top: 4px solid var(--accent);
+        }
+
+        .back-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .sub-parts-list {
+            text-align: right;
+            display: inline-block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="main-title">تشريح المحرك الهندسي (بالعراقي) 🛠️</h1>
+    <p>اضغط على القطعة حتى "تغوص" بتفاصيلها الداخلية</p>
+
+    <div class="viewport">
+        <img id="engine-display" src="https://images.unsplash.com/photo-1502743780242-f10d2ce674f3?q=80&w=1000" alt="Engine">
+        
+        <div id="spots-container"></div>
+    </div>
+
+    <div id="detail-panel">
+        <h2 id="part-title" style="color:var(--accent)"></h2>
+        <p id="part-desc"></p>
+        <div class="sub-parts-list" id="sub-list"></div>
+        <br>
+        <button class="back-btn" onclick="resetApp()">الرجوع للمحرك الكامل</button>
+    </div>
+
+    <script>
+        const engineData = {
+            main: [
+                { id: 'core', name: 'الكور (رأس المحرك)', x: '50%', y: '30%', desc: 'هذا الجزء العلوي اللي تصير بيه كل عمليات السحب والحرق.' },
+                { id: 'cooling', name: 'دورة التبريد', x: '20%', y: '60%', desc: 'المسؤولة عن حماية المكينة من الحماوة الزايدة.' },
+                { id: 'fuel', name: 'منظومة الوقود', x: '70%', y: '40%', desc: 'اللي توصل البنزين للهات المكينة.' }
+            ],
+            sub: {
+                core: [
+                    { name: 'السكبات (Camshafts)', detail: 'الأعمدة اللي تفتح وتنسد اللفات.' },
+                    { name: 'اللفات (Valves)', detail: 'الصمامات اللي تدخل هوى وتطلع دخان.' },
+                    { name: 'البلكات (Spark Plugs)', detail: 'اللي تنطي الشرارة (القدحة).' }
+                ],
+                cooling: [
+                    { name: 'الراديتر', detail: 'المكان اللي يتبرد بيه المي.' },
+                    { name: 'جويتر المي', detail: 'الوصلات اللي تنقل المي.' },
+                    { name: 'الواتر بِم (Water Pump)', detail: 'المضخة اللي تدفع المي.' }
+                ]
+            }
+        };
+
+        const container = document.getElementById('spots-container');
+        const img = document.getElementById('engine-display');
+        const panel = document.getElementById('detail-panel');
+
+        function renderMainSpots() {
+            container.innerHTML = '';
+            engineData.main.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'hotspot';
+                div.style.left = p.x;
+                div.style.top = p.y;
+                div.innerHTML = '+';
+                div.onclick = () => zoomToPart(p);
+                container.appendChild(div);
+            });
+        }
+
+        function zoomToPart(part) {
+            img.style.transform = `scale(2.5)`;
+            img.style.transformOrigin = `${part.x} ${part.y}`;
+            container.innerHTML = ''; // اخفاء النقاط عند الزوم
+            
+            panel.style.display = 'block';
+            document.getElementById('part-title').innerText = part.name;
+            document.getElementById('part-desc').innerText = part.desc;
+            
+            const subList = document.getElementById('sub-list');
+            subList.innerHTML = '<strong>الأجزاء الداخلية:</strong><ul style="list-style:none; padding:0;">' + 
+                engineData.sub[part.id].map(s => `<li>🔹 <b>${s.name}:</b> ${s.detail}</li>`).join('') + '</ul>';
+        }
+
+        function resetApp() {
+            img.style.transform = 'scale(1)';
+            panel.style.display = 'none';
+            renderMainSpots();
+        }
+
+        renderMainSpots();
+    </script>
+</body>
+</html>
