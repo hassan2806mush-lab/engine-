@@ -2,175 +2,54 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشروع حسن - تشريح المحرك</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مشروع حسن الهندسي</title>
     <style>
-        :root { --main-red: #ff4757; --dark-bg: #121212; }
-        body { font-family: 'Tahoma', sans-serif; background: var(--dark-bg); color: white; margin: 0; padding: 0; }
-        
-        header { padding: 20px; text-align: center; background: #1a1a1a; border-bottom: 3px solid var(--main-red); }
-        h1 { margin: 0; font-size: 1.5rem; color: var(--main-red); }
-        .user-name { font-size: 0.9rem; color: #aaa; margin-top: 5px; }
-
-        .viewport {
-            position: relative;
-            width: 100vw; /* عرض الشاشة بالكامل */
-            height: 60vh; /* ارتفاع مناسب للموبايل */
-            overflow: hidden;
-            background: #000;
-        }
-
-        #engine-display {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* يخلي الصورة تملي المكان بدون ما تنعفص */
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .hotspot {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background: var(--main-red);
-            border: 2px solid white;
-            border-radius: 50%;
-            transform: translate(-50%, -50%); /* لموازنة مكان النقطة */
-            box-shadow: 0 0 15px var(--main-red);
-        }
-
-        #detail-panel {
-            padding: 20px;
-            background: #1a1a1a;
-            border-radius: 20px 200px 0 0; /* شكل جمالي */
-            margin-top: -20px;
-            position: relative;
-            display: none;
-            z-index: 10;
-        }
-
-        .back-btn {
-            background: var(--main-red);
-            border: none; color: white; padding: 10px 25px;
-            border-radius: 50px; font-weight: bold; margin-top: 15px;
-        }
-
-        ul { padding: 0; list-style: none; text-align: right; }
-        li { padding: 10px 0; border-bottom: 1px solid #333; }
+        body { margin: 0; background: #000; color: white; font-family: sans-serif; overflow-x: hidden; }
+        header { background: #1a1a1a; padding: 15px; text-align: center; border-bottom: 2px solid #ff4757; }
+        .engine-box { position: relative; width: 100vw; height: 50vh; background: #222; overflow: hidden; }
+        #engine-img { width: 100%; height: 100%; object-fit: contain; transition: 0.5s; }
+        .dot { position: absolute; width: 25px; height: 25px; background: #ff4757; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px #ff4757; cursor: pointer; }
+        #info { padding: 20px; background: #111; min-height: 200px; }
+        .title { color: #ff4757; font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; }
+        .back-btn { display: none; background: #444; color: #fff; border: none; padding: 10px 20px; margin-top: 15px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>🛠️ تشريح المحرك الهندسي</h1>
-        <div class="user-name">إعداد المهندس: حسن</div>
-    </header>
+<header>
+    <div style="font-size: 1.2rem; color: #ff4757; font-weight: bold;">تشريح المحرك الهندسي</div>
+    <div style="font-size: 0.8rem; color: #888;">إعداد المهندس: حسن</div>
+</header>
 
-    <div class="viewport" id="view">
-        <img id="engine-display" src="https://images.unsplash.com/photo-1597766353939-93725666060c?q=80&w=1200" alt="Engine">
-        <div id="spots-container"></div>
-    </div>
+<div class="engine-box">
+    <img id="engine-img" src="https://images.pexels.com/photos/190574/pexels-photo-190574.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Engine">
+    
+    <div class="dot" style="top: 40%; left: 50%;" onclick="zoom('الكور والحشوة', 'تشمل السكبات (شفتات اللفات) واللفات والبساتم اللي تولد الحركة.')"></div>
+    <div class="dot" style="top: 30%; left: 80%;" onclick="zoom('الفيوزات والكهرباء', 'مثل ما قالت نبأ، هي حماية السيارة؛ يطگ الفيوز حتى يحمي القطع الغالية.')"></div>
+    <div class="dot" style="top: 70%; left: 30%;" onclick="zoom('منظومة التبريد', 'تشمل الراديتر والدبة ومضخة المي حتى المكينة ما تحمى.')"></div>
+</div>
 
-    <div id="detail-panel">
-        <h2 id="part-title" style="color:var(--main-red)"></h2>
-        <div id="sub-list"></div>
-        <button class="back-btn" onclick="resetApp()">الرجوع للمحرك الكامل</button>
-    </div>
+<div id="info">
+    <div id="part-name" class="title">اضغط على النقاط الحمراء</div>
+    <div id="part-desc">استكشف أجزاء البنيد بالتفصيل...</div>
+    <button id="back" class="back-btn" onclick="resetView()">رجوع للصورة الكاملة</button>
+</div>
 
-    <script>
-        const engineData = {
-            main: [
-                { id: 'core', name: 'الكور (حشوة المكينة)', x: '50%', y: '45%' },
-                { id: 'elec', name: 'الفيوزات والكهرباء', x: '85%', y: '35%' },
-                { id: 'cool', name: 'الراديتر والتبريد', x: '20%', y: '70%' }
-            ],
-            sub: {
-                core: ['السكبات: شفتات اللفات','اللفات: بوابات الهوى','البلكات: القدحة والشرارة','البساتم: عمود الحركة'],
-                elec: ['علبة الفيوزات: الحماية','الدينامو: الشحن','الباتري: طاقة البدء'],
-                cool: ['الراديتر: مبرد المي','المراوح: سحب الهوى','دبة المي: خزان الاحتياط']
-            }
-        };
+<script>
+    function zoom(name, desc) {
+        document.getElementById('part-name').innerText = name;
+        document.getElementById('part-desc').innerText = desc;
+        document.getElementById('engine-img').style.transform = "scale(1.8)";
+        document.getElementById('back').style.display = "block";
+    }
+    function resetView() {
+        document.getElementById('engine-img').style.transform = "scale(1)";
+        document.getElementById('part-name').innerText = "اضغط على النقاط الحمراء";
+        document.getElementById('part-desc').innerText = "استكشف أجزاء البنيد بالتفصيل...";
+        document.getElementById('back').style.display = "none";
+    }
+</script>
 
-        function render() {
-            const container = document.getElementById('spots-container');
-            container.innerHTML = '';
-            engineData.main.forEach(p => {
-                const dot = document.createElement('div');
-                dot.className = 'hotspot';
-                dot.style.left = p.x; dot.style.top = p.y;
-                dot.onclick = () => {
-                    const img = document.getElementById('engine-display');
-                    img.style.transform = "scale(2.5)";
-                    img.style.transformOrigin = `${p.x} ${p.y}`;
-                    document.getElementById('detail-panel').style.display = 'block';
-                    document.getElementById('part-title').innerText = p.name;
-                    document.getElementById('sub-list').innerHTML = '<ul>' + engineData.sub[p.id].map(s => `<li>🔹 ${s}</li>`).join('') + '</ul>';
-                    container.innerHTML = '';
-                };
-                container.appendChild(dot);
-            });
-        }
-
-        function resetApp() {
-            document.getElementById('engine-display').style.transform = "scale(1)";
-            document.getElementById('detail-panel').style.display = 'none';
-            render();
-        }
-
-        render();
-    </script>
-</body>
-</html>
-            main: [
-                { id: 'core', name: 'الكور (قلب المكينة)', x: '50%', y: '40%' },
-                { id: 'electrical', name: 'المنظومة الكهربائية', x: '80%', y: '30%' },
-                { id: 'belts', name: 'القوايش والحركة', x: '20%', y: '50%' }
-            ],
-            sub: {
-                core: [
-                    { n: 'السكبات', d: 'شفتات حديد صلب تفتح اللفات.' },
-                    { n: 'اللفات', d: 'بوابات الهوى والبنزين والدخان.' },
-                    { n: 'البساتم', d: 'اللي تصعد وتنزل وتولد القوة.' },
-                    { n: 'البلكات', d: 'اللي تنطي الشرارة (القدحة).' }
-                ],
-                electrical: [
-                    { n: 'علبة الفيوزات', d: 'صندوق الحماية (يطگ الفيوز قبل لا تحترك القطعة).' },
-                    { n: 'الدينامو', d: 'المسؤول عن شحن الباتري وتشغيل الكهرباء.' },
-                    { n: 'الباتري', d: 'مخزن الطاقة الأساسي.' }
-                ],
-                belts: [
-                    { n: 'قايش التايمن', d: 'أخطر قايش، يربط السكبات بالكرنك.' },
-                    { n: 'قايش المروحة', d: 'يشغل الدينامو ومضخة المي.' }
-                ]
-            }
-        };
-
-        function renderMain() {
-            const container = document.getElementById('spots-container');
-            container.innerHTML = '';
-            engineData.main.forEach(p => {
-                const d = document.createElement('div');
-                d.className = 'hotspot';
-                d.style.left = p.x; d.style.top = p.y;
-                d.onclick = () => {
-                    document.getElementById('engine-display').style.transform = `scale(2.5)`;
-                    document.getElementById('engine-display').style.transformOrigin = `${p.x} ${p.y}`;
-                    document.getElementById('detail-panel').style.display = 'block';
-                    document.getElementById('part-title').innerText = p.name;
-                    document.getElementById('sub-list').innerHTML = '<ul>' + 
-                        engineData.sub[p.id].map(s => `<li><b>${s.n}:</b> ${s.d}</li>`).join('') + '</ul>';
-                    container.innerHTML = '';
-                };
-                container.appendChild(d);
-            });
-        }
-
-        function resetApp() {
-            document.getElementById('engine-display').style.transform = 'scale(1)';
-            document.getElementById('detail-panel').style.display = 'none';
-            renderMain();
-        }
-
-        renderMain();
-    </script>
 </body>
 </html>
